@@ -1,0 +1,32 @@
+const InventoryManager = {
+  initialInventory: [
+    { id: 'SKU001', name: 'Laptop Computer', quantity: 45, location: 'A-12', barcode: '1234567890123' },
+    { id: 'SKU002', name: 'Wireless Mouse', quantity: 120, location: 'B-05', barcode: '2345678901234' },
+    { id: 'SKU003', name: 'USB Keyboard', quantity: 85, location: 'B-06', barcode: '3456789012345' },
+    { id: 'SKU004', name: 'Monitor 27"', quantity: 32, location: 'A-15', barcode: '4567890123456' },
+    { id: 'SKU005', name: 'Ethernet Cable', quantity: 200, location: 'C-02', barcode: '5678901234567' },
+    { id: 'SKU006', name: 'Power Adapter', quantity: 150, location: 'C-03', barcode: '6789012345678' },
+  ],
+
+  findItemByBarcode: (inventory, barcode) => {
+    return inventory.find(item => item.barcode === barcode);
+  },
+
+  updateInventory: (inventory, barcode, quantity, mode) => {
+    return inventory.map(item => {
+      if (item.barcode === barcode) {
+        return {
+          ...item,
+          quantity: mode === 'receive' 
+            ? item.quantity + quantity 
+            : Math.max(0, item.quantity - quantity)
+        };
+      }
+      return item;
+    });
+  },
+
+  getTotalItems: (inventory) => {
+    return inventory.reduce((sum, item) => sum + item.quantity, 0);
+  }
+};
