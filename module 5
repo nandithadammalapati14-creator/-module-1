@@ -1,0 +1,106 @@
+const WarehouseScannerSimulator = () => {
+  const [inventory, setInventory] = useState(InventoryManager.initialInventory);
+  const [scanInput, setScanInput] = useState('');
+  const [scanHistory, setScanHistory] = useState([]);
+  const [currentScan, setCurrentScan] = useState(null);
+  const [scanMode, setScanMode] = useState('receive');
+  const [quantityInput, setQuantityInput] = useState('1');
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const handleScan = () => {
+    if (!scanInput.trim()) return;
+
+    const qty = parseInt(quantityInput) || 1;
+    const scanRecord = ScanProcessor.processScan(
+      scanInput.trim(),
+      qty,
+      scanMode,
+      inventory
+    );
+
+    AudioSystem.playBeep(scanRecord.success);
+
+    if (scanRecord.success) {
+      const updatedInventory = InventoryManager.updateInventory(
+        inventory,
+        scanInput.trim(),
+        qty,
+        scanMode
+      );
+      setInventory(updatedInventory);
+    }
+
+    setScanHistory(ScanProcessor.createScanHistory(scanRecord, scanHistory));
+    setCurrentScan(scanRecord);
+    setTimeout(() => setCurrentScan(null), 3000);
+
+    setScanInput('');
+    setQuantityInput('1');
+  };
+
+  const totalItems = InventoryManager.getTotalItems(inventory);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <Package className="w-10 h-10 text-blue-400" />
+            <h1 className="text-4xl font-bold">Warehouse Scanner</h1>
+          </div>
+          <p className="text-slate-400">Real-time inventory management system - 5 Modular Components</p>
+        </div>
+
+        {/* Stats Dashboard */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <UIComponents.StatsCard 
+            title="Total Items" 
+            value={totalItems} 
+            icon={TrendingUp} 
+            color="blue" 
+          />
+          <UIComponents.StatsCard 
+            title="SKU Count" 
+            value={inventory.length} 
+            icon={Package} 
+            color="green" 
+          />
+          <UIComponents.StatsCard 
+            title="Scans Today" 
+            value={scanHistory.length} 
+            icon={Scan} 
+            color="purple" 
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <UIComponents.ScanResultDisplay scanResult={currentScan} />
+            
+            <UIComponents.ScannerControls
+              scanMode={scanMode}
+              setScanMode={setScanMode}
+              scanInput={scanInput}
+              setScanInput={setScanInput}
+              quantityInput={quantityInput}
+              setQuantityInput={setQuantityInput}
+              onScan={handleScan}
+              inputRef={inputRef}
+            />
+
+            <UIComponents.ScanHistoryList history={scanHistory} />
+          </div>
+
+          <UIComponents.InventoryList inventory={inventory} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default WarehouseScannerSimulator;
