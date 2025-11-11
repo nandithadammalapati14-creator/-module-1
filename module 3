@@ -1,0 +1,29 @@
+ScanProcessor = {
+  processScan: (barcode, quantity, mode, inventory) => {
+    const item = InventoryManager.findItemByBarcode(inventory, barcode);
+    const timestamp = new Date().toLocaleTimeString();
+
+    if (item) {
+      return {
+        success: true,
+        time: timestamp,
+        item: item.name,
+        barcode: item.barcode,
+        location: item.location,
+        quantity: quantity,
+        mode: mode
+      };
+    } else {
+      return {
+        success: false,
+        time: timestamp,
+        barcode: barcode,
+        mode: mode
+      };
+    }
+  },
+
+  createScanHistory: (scanRecord, existingHistory, maxLength = 10) => {
+    return [scanRecord, ...existingHistory.slice(0, maxLength - 1)];
+  }
+};
