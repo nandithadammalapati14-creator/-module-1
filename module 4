@@ -1,0 +1,193 @@
+onst UIComponents = {
+  StatsCard: ({ title, value, icon: Icon, color }) => (
+    <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-slate-400 text-sm">{title}</p>
+          <p className={⁠ text-3xl font-bold text-${color}-400 ⁠}>{value}</p>
+        </div>
+        <Icon className={⁠ w-8 h-8 text-${color}-400 ⁠} />
+      </div>
+    </div>
+  ),
+
+  ScanResultDisplay: ({ scanResult }) => {
+    if (!scanResult) return null;
+
+    return (
+      <div className={`p-6 rounded-lg border-2 ${
+        scanResult.success 
+          ? 'bg-green-900/20 border-green-500' 
+          : 'bg-red-900/20 border-red-500'
+      } animate-pulse`}>
+        <div className="flex items-start gap-4">
+          {scanResult.success ? (
+            <CheckCircle className="w-8 h-8 text-green-400 flex-shrink-0" />
+          ) : (
+            <XCircle className="w-8 h-8 text-red-400 flex-shrink-0" />
+          )}
+          <div className="flex-1">
+            {scanResult.success ? (
+              <>
+                <h3 className="text-2xl font-bold text-green-400 mb-2">
+                  {scanResult.mode === 'receive' ? 'RECEIVED' : 'SHIPPED'}
+                </h3>
+                <p className="text-xl mb-1">{scanResult.item}</p>
+                <p className="text-slate-300">Quantity: {scanResult.quantity}</p>
+                <p className="text-slate-400 text-sm">Location: {scanResult.location}</p>
+              </>
+            ) : (
+              <>
+                <h3 className="text-2xl font-bold text-red-400 mb-2">NOT FOUND</h3>
+                <p className="text-slate-300">Barcode: {scanResult.barcode}</p>
+                <p className="text-slate-400 text-sm">Item not in inventory</p>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  },
+
+  ScannerControls: ({ scanMode, setScanMode, scanInput, setScanInput, quantityInput, setQuantityInput, onScan, inputRef }) => (
+    <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+      <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+        <Scan className="w-6 h-6 text-blue-400" />
+        Scan Item
+      </h2>
+      
+      <div className="space-y-4">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setScanMode('receive')}
+            className={`flex-1 py-3 px-4 rounded-lg font-semibold transition ${
+              scanMode === 'receive'
+                ? 'bg-green-600 text-white'
+                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            }`}
+          >
+            Receive
+          </button>
+          <button
+            onClick={() => setScanMode('ship')}
+            className={`flex-1 py-3 px-4 rounded-lg font-semibold transition ${
+              scanMode === 'ship'
+                ? 'bg-orange-600 text-white'
+                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            }`}
+          >
+            Ship
+          </button>
+        </div>
+
+        <div>
+          <label className="block text-sm text-slate-400 mb-2">Barcode</label>
+          <input
+            ref={inputRef}
+            type="text"
+            value={scanInput}
+            onChange={(e) => setScanInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && onScan()}
+            placeholder="Scan or enter barcode..."
+            className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white text-lg focus:outline-none focus:border-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm text-slate-400 mb-2">Quantity</label>
+          <input
+            type="number"
+            min="1"
+            value={quantityInput}
+            onChange={(e) => setQuantityInput(e.target.value)}
+            className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white text-lg focus:outline-none focus:border-blue-500"
+          />
+        </div>
+
+        <button
+          onClick={onScan}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2"
+        >
+          <Scan className="w-5 h-5" />
+          Process Scan
+        </button>
+      </div>
+
+      <div className="mt-4 p-4 bg-slate-900 rounded-lg border border-slate-700">
+        <p className="text-xs text-slate-400 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4" />
+          Try scanning: 1234567890123, 2345678901234, or 3456789012345
+        </p>
+      </div>
+    </div>
+  ),
+
+  ScanHistoryList: ({ history }) => (
+    <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+      <h2 className="text-xl font-bold mb-4">Recent Scans</h2>
+      <div className="space-y-2 max-h-64 overflow-y-auto">
+        {history.length === 0 ? (
+          <p className="text-slate-400 text-center py-4">No scans yet</p>
+        ) : (
+          history.map((scan, idx) => (
+            <div
+              key={idx}
+              className={`p-3 rounded-lg border ${
+                scan.success
+                  ? 'bg-slate-700/50 border-slate-600'
+                  : 'bg-red-900/20 border-red-800'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {scan.success ? (
+                    <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                  ) : (
+                    <XCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                  )}
+                  <div>
+                    <p className="font-medium">
+                      {scan.success ? scan.item : ⁠ Unknown (${scan.barcode}) ⁠}
+                    </p>
+                    {scan.success && (
+                      <p className="text-sm text-slate-400">
+                        {scan.mode === 'receive' ? '+' : '-'}{scan.quantity} | {scan.location}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <span className="text-xs text-slate-400">{scan.time}</span>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  ),
+
+  InventoryList: ({ inventory }) => (
+    <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+      <h2 className="text-xl font-bold mb-4">Current Inventory</h2>
+      <div className="space-y-3 max-h-[800px] overflow-y-auto">
+        {inventory.map((item) => (
+          <div
+            key={item.id}
+            className="bg-slate-700/50 rounded-lg p-4 border border-slate-600"
+          >
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="font-semibold text-white">{item.name}</h3>
+              <span className={`text-lg font-bold ${
+                item.quantity < 50 ? 'text-orange-400' : 'text-green-400'
+              }`}>
+                {item.quantity}
+              </span>
+            </div>
+            <p className="text-sm text-slate-400 mb-1">SKU: {item.id}</p>
+            <p className="text-sm text-slate-400 mb-1">Location: {item.location}</p>
+            <p className="text-xs text-slate-500 font-mono">{item.barcode}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+};
